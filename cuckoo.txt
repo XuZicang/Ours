@@ -1,0 +1,42 @@
+start read csr bin file....uintV_size=4,uintE_size=8
+vertex_count=8860450,edge_count=520523686
+finish read csr bin file, elapsed_time=14687.2ms
+520523686
+1926
+0x7f21aa805400
+1292379
+7568071
+enlarge2048
+1282
+enlarge2048
+1548
+enlarge2048
+1481
+enlarge2048
+1614
+enlarge2048
+1649
+enlarge2048
+1614
+enlarge2048
+1632
+enlarge2048
+1817
+enlarge2048
+1841
+enlarge2048
+1748
+enlarge2048
+1845
+enlarge2048
+1741
+enlarge2048
+1831
+enlarge2048
+960
+enlarge2048
+1087
+624126848 624126848construct ok
+max hash_table: 4096
+9936161560
+1012.98ms

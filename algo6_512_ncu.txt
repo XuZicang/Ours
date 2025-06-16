@@ -1,0 +1,102 @@
+start read csr bin file....uintV_size=4,uintE_size=8
+vertex_count=8860450,edge_count=520523686
+finish read csr bin file, elapsed_time=8115.79ms
+520523686
+1926
+==PROF== Connected to process 3751437 (/home/xuzicang/BFSM/GraphChallenge/Ours/triangle)
+0x7fa8ec805400
+53961
+8806489
+==PROF== Profiling "triangle_counting_dense_with_..." - 0: 0%
+==WARNING== Backing up device memory in system memory. Kernel replay might be slow. Consider using "--replay-mode application" to avoid memory save-and-restore.
+....50%....100% - 11 passes
+hash_table_total_size: 2103809
+7569574443
+27858.8ms
+==PROF== Disconnected from process 3751437
+[3751437] triangle@127.0.0.1
+  triangle_counting_dense_with_hash1(unsigned int, unsigned long long *, unsigned int *, unsigned int *, unsigned int, unsigned int *, unsigned int *, unsigned long *, unsigned int *, unsigned int) (432, 1, 1)x(512, 1, 1), Context 1, Stream 13, Device 0, CC 8.0
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- ------------
+    Metric Name             Metric Unit Metric Value
+    ----------------------- ----------- ------------
+    DRAM Frequency                  Ghz         1.51
+    SM Frequency                    Ghz         1.06
+    Elapsed Cycles                cycle  377,871,170
+    Memory Throughput                 %        32.39
+    DRAM Throughput                   %        14.05
+    Duration                         ms       354.83
+    L1/TEX Cache Throughput           %        35.30
+    L2 Cache Throughput               %        20.37
+    SM Active Cycles              cycle  347,669,765
+    Compute (SM) Throughput           %        65.46
+    ----------------------- ----------- ------------
+
+    OPT   Compute is more heavily utilized than Memory: Look at the Compute Workload Analysis section to see what the   
+          compute pipelines are spending their time doing. Also, consider whether any computation is redundant and      
+          could be reduced or moved to look-up tables.                                                                  
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   512
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    432
+    Registers Per Thread             register/thread              25
+    Shared Memory Configuration Size           Kbyte          135.17
+    Driver Shared Memory Per Block       Kbyte/block            1.02
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block           26.76
+    # SMs                                         SM             108
+    Stack Size                                                 1,024
+    Threads                                   thread         221,184
+    # TPCs                                                        54
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                   1
+    -------------------------------- --------------- ---------------
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           32
+    Block Limit Registers                 block            4
+    Block Limit Shared Mem                block            4
+    Block Limit Warps                     block            4
+    Theoretical Active Warps per SM        warp           64
+    Theoretical Occupancy                     %          100
+    Achieved Occupancy                        %        92.62
+    Achieved Active Warps Per SM           warp        59.28
+    ------------------------------- ----------- ------------
+
+    Section: GPU and Memory Workload Distribution
+    -------------------------- ----------- ---------------
+    Metric Name                Metric Unit    Metric Value
+    -------------------------- ----------- ---------------
+    Average DRAM Active Cycles       cycle   75,390,918.20
+    Total DRAM Elapsed Cycles        cycle  21,460,001,280
+    Average L1 Active Cycles         cycle     347,669,765
+    Total L1 Elapsed Cycles          cycle  40,927,225,434
+    Average L2 Active Cycles         cycle  349,430,518.50
+    Total L2 Elapsed Cycles          cycle  28,950,532,640
+    Average SM Active Cycles         cycle     347,669,765
+    Total SM Elapsed Cycles          cycle  40,927,225,434
+    Average SMSP Active Cycles       cycle  347,948,389.93
+    Total SMSP Elapsed Cycles        cycle 163,708,901,736
+    -------------------------- ----------- ---------------
+
+    OPT   Est. Speedup: 7.332%                                                                                          
+          One or more SMs have a much lower number of active cycles than the average number of active cycles. Maximum   
+          instance value is 7.99% above the average, while the minimum instance value is 12.21% below the average.      
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Speedup: 7.793%                                                                                          
+          One or more SMSPs have a much lower number of active cycles than the average number of active cycles. Maximum 
+          instance value is 8.49% above the average, while the minimum instance value is 13.69% below the average.      
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Speedup: 7.332%                                                                                          
+          One or more L1 Slices have a much lower number of active cycles than the average number of active cycles.     
+          Maximum instance value is 7.99% above the average, while the minimum instance value is 12.21% below the       
+          average.                                                                                                      
+

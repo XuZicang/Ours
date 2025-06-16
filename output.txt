@@ -1,0 +1,448 @@
+==PROF== Disconnected from process 1017898
+[1017898] triangle@127.0.0.1
+  triangle_counting_dense_with_shared_memory_cuckoo(unsigned int, unsigned long long *, unsigned int *, unsigned int *, unsigned int, unsigned int *, unsigned int *, unsigned long *, unsigned int *, unsigned int) (432, 1, 1)x(512, 1, 1), Context 1, Stream 7, Device 0, CC 8.0
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- ----------------
+    Metric Name             Metric Unit     Metric Value
+    ----------------------- ----------- ----------------
+    DRAM Frequency                  Ghz             1.21
+    SM Frequency                    Mhz           765.00
+    Elapsed Cycles                cycle    1,204,075,152
+    Memory Throughput                 %            30.15
+    DRAM Throughput                   %            20.30
+    Duration                          s             1.57
+    L1/TEX Cache Throughput           %            30.17
+    L2 Cache Throughput               %            30.14
+    SM Active Cycles              cycle 1,203,462,041.37
+    Compute (SM) Throughput           %            67.06
+    ----------------------- ----------- ----------------
+
+    OPT   Compute is more heavily utilized than Memory: Look at the Compute Workload Analysis section to see what the   
+          compute pipelines are spending their time doing. Also, consider whether any computation is redundant and      
+          could be reduced or moved to look-up tables.                                                                  
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   512
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    432
+    Registers Per Thread             register/thread              26
+    Shared Memory Configuration Size           Kbyte          102.40
+    Driver Shared Memory Per Block       Kbyte/block            1.02
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block            8.20
+    # SMs                                         SM             108
+    Stack Size                                                 1,024
+    Threads                                   thread         221,184
+    # TPCs                                                        54
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                   1
+    -------------------------------- --------------- ---------------
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           32
+    Block Limit Registers                 block            4
+    Block Limit Shared Mem                block           10
+    Block Limit Warps                     block            4
+    Theoretical Active Warps per SM        warp           64
+    Theoretical Occupancy                     %          100
+    Achieved Occupancy                        %        99.95
+    Achieved Active Warps Per SM           warp        63.97
+    ------------------------------- ----------- ------------
+
+    Section: GPU and Memory Workload Distribution
+    -------------------------- ----------- ----------------
+    Metric Name                Metric Unit     Metric Value
+    -------------------------- ----------- ----------------
+    Average DRAM Active Cycles       cycle      388,257,809
+    Total DRAM Elapsed Cycles        cycle   76,494,187,008
+    Average L1 Active Cycles         cycle 1,203,462,041.37
+    Total L1 Elapsed Cycles          cycle  130,047,537,358
+    Average L2 Active Cycles         cycle 1,132,756,914.54
+    Total L2 Elapsed Cycles          cycle   90,659,776,000
+    Average SM Active Cycles         cycle 1,203,462,041.37
+    Total SM Elapsed Cycles          cycle  130,047,537,358
+    Average SMSP Active Cycles       cycle 1,203,512,340.51
+    Total SMSP Elapsed Cycles        cycle  520,190,149,432
+    -------------------------- ----------- ----------------
+
+  triangle_counting_sparse_with_subwarp(unsigned int, unsigned long long *, unsigned int *, unsigned int *, unsigned int, unsigned long *, unsigned int *, unsigned int) (216, 1, 1)x(1024, 1, 1), Context 1, Stream 7, Device 0, CC 8.0
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- -------------
+    Metric Name             Metric Unit  Metric Value
+    ----------------------- ----------- -------------
+    DRAM Frequency                  Ghz          1.21
+    SM Frequency                    Mhz        765.00
+    Elapsed Cycles                cycle    40,438,682
+    Memory Throughput                 %         40.66
+    DRAM Throughput                   %         40.66
+    Duration                         ms         52.86
+    L1/TEX Cache Throughput           %         21.94
+    L2 Cache Throughput               %         59.30
+    SM Active Cycles              cycle 40,433,385.79
+    Compute (SM) Throughput           %         55.32
+    ----------------------- ----------- -------------
+
+    OPT   This workload exhibits low compute throughput and memory bandwidth utilization relative to the peak           
+          performance of this device. Achieved compute throughput and/or memory bandwidth below 60.0% of peak           
+          typically indicate latency issues. Look at Scheduler Statistics and Warp State Statistics for potential       
+          reasons.                                                                                                      
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                 1,024
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    216
+    Registers Per Thread             register/thread              26
+    Shared Memory Configuration Size           Kbyte           16.38
+    Driver Shared Memory Per Block       Kbyte/block            1.02
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block            4.61
+    # SMs                                         SM             108
+    Stack Size                                                 1,024
+    Threads                                   thread         221,184
+    # TPCs                                                        54
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                   1
+    -------------------------------- --------------- ---------------
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           32
+    Block Limit Registers                 block            2
+    Block Limit Shared Mem                block            2
+    Block Limit Warps                     block            2
+    Theoretical Active Warps per SM        warp           64
+    Theoretical Occupancy                     %          100
+    Achieved Occupancy                        %       100.26
+    Achieved Active Warps Per SM           warp        64.17
+    ------------------------------- ----------- ------------
+
+    Section: GPU and Memory Workload Distribution
+    -------------------------- ----------- --------------
+    Metric Name                Metric Unit   Metric Value
+    -------------------------- ----------- --------------
+    Average DRAM Active Cycles       cycle  26,113,044.10
+    Total DRAM Elapsed Cycles        cycle  2,569,045,632
+    Average L1 Active Cycles         cycle  40,433,385.79
+    Total L1 Elapsed Cycles          cycle  4,379,785,928
+    Average L2 Active Cycles         cycle  37,208,051.56
+    Total L2 Elapsed Cycles          cycle  3,044,793,760
+    Average SM Active Cycles         cycle  40,433,385.79
+    Total SM Elapsed Cycles          cycle  4,379,785,928
+    Average SMSP Active Cycles       cycle  40,465,636.93
+    Total SMSP Elapsed Cycles        cycle 17,519,143,712
+    -------------------------- ----------- --------------
+
+root@zktitan-Super-Server:/home/xuzicang/BFSM/GraphChallenge/Ours# cd ../Mercury/
+root@zktitan-Super-Server:/home/xuzicang/BFSM/GraphChallenge/Mercury# /usr/local/cuda-12.1/bin/ncu ./tc_challenge ../../GraphChallengeData/graph500/graph500-scale24-ef16.bin
+Triangle Counting
+uintV_size=4,uintE_size=8
+vertex_count=8860450,edge_count=520523686
+431690
+|V|: 8860450, |E|: 520523686, Max Degree: 431690
+vertex-|Σ|: 91
+edge-|Σ|: 3
+Vertex feature vector length: 110
+Orientation enabled, using DAG
+Time on generating the DAG: 5.72061 sec
+==PROF== Connected to process 1045216 (/home/xuzicang/BFSM/GraphChallenge/Mercury/tc_challenge)
+|V|: 8860450, |E|: 260261843, Max Degree: 1925
+vertex-|Σ|: 91
+edge-|Σ|: 3
+Vertex feature vector length: 110
+Bucket memory allocation: 256 MB
+==PROF== Profiling "hashIndex_for_large_degree" - 0: 0%....50%....100% - 10 passes
+==PROF== Profiling "binarySearch_for_small_degree" - 1: 0%....50%....100% - 10 passes
+Runtime  = 10.7449 sec
+total_num_triangles = 9936161560
+==PROF== Disconnected from process 1045216
+[1045216] tc_challenge@127.0.0.1
+  hashIndex_for_large_degree(GraphGPU, unsigned long long *, int *, int *, int, int, int, int *) (1024, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.0
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- --------------
+    Metric Name             Metric Unit   Metric Value
+    ----------------------- ----------- --------------
+    DRAM Frequency                  Ghz           1.21
+    SM Frequency                    Mhz         765.00
+    Elapsed Cycles                cycle    608,880,498
+    Memory Throughput                 %          35.10
+    DRAM Throughput                   %          22.35
+    Duration                         ms         795.92
+    L1/TEX Cache Throughput           %          35.47
+    L2 Cache Throughput               %          32.15
+    SM Active Cycles              cycle 602,633,008.56
+    Compute (SM) Throughput           %          75.16
+    ----------------------- ----------- --------------
+
+    OPT   Compute is more heavily utilized than Memory: Look at the Compute Workload Analysis section to see what the   
+          compute pipelines are spending their time doing. Also, consider whether any computation is redundant and      
+          could be reduced or moved to look-up tables.                                                                  
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   256
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                  1,024
+    Registers Per Thread             register/thread              32
+    Shared Memory Configuration Size           Kbyte          167.94
+    Driver Shared Memory Per Block       Kbyte/block            1.02
+    Dynamic Shared Memory Per Block      Kbyte/block           16.38
+    Static Shared Memory Per Block       Kbyte/block            4.11
+    # SMs                                         SM             108
+    Stack Size                                                 1,024
+    Threads                                   thread         262,144
+    # TPCs                                                        54
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                1.35
+    -------------------------------- --------------- ---------------
+
+    OPT   Est. Speedup: 50%                                                                                             
+          A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 1 full waves and a partial wave of 268 thread blocks.  
+          Under the assumption of a uniform execution duration of all thread blocks, this partial wave may account for  
+          up to 50.0% of the total runtime of this kernel. Try launching a grid with no partial wave. The overall       
+          impact of this tail effect also lessens with the number of full waves executed for a grid. See the Hardware   
+          Model (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-hw-model) description for     
+          more details on launch configurations.                                                                        
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           32
+    Block Limit Registers                 block            8
+    Block Limit Shared Mem                block            7
+    Block Limit Warps                     block            8
+    Theoretical Active Warps per SM        warp           56
+    Theoretical Occupancy                     %        87.50
+    Achieved Occupancy                        %        86.24
+    Achieved Active Warps Per SM           warp        55.20
+    ------------------------------- ----------- ------------
+
+    Section: GPU and Memory Workload Distribution
+    -------------------------- ----------- ---------------
+    Metric Name                Metric Unit    Metric Value
+    -------------------------- ----------- ---------------
+    Average DRAM Active Cycles       cycle  216,117,568.80
+    Total DRAM Elapsed Cycles        cycle  38,681,820,672
+    Average L1 Active Cycles         cycle  602,633,008.56
+    Total L1 Elapsed Cycles          cycle  65,772,284,256
+    Average L2 Active Cycles         cycle  570,745,622.99
+    Total L2 Elapsed Cycles          cycle  45,845,119,600
+    Average SM Active Cycles         cycle  602,633,008.56
+    Total SM Elapsed Cycles          cycle  65,772,284,256
+    Average SMSP Active Cycles       cycle  602,879,901.80
+    Total SMSP Elapsed Cycles        cycle 263,089,137,024
+    -------------------------- ----------- ---------------
+
+  binarySearch_for_small_degree(GraphGPU, unsigned long long *, int *, int *, int) (1024, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.0
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- -------------
+    Metric Name             Metric Unit  Metric Value
+    ----------------------- ----------- -------------
+    DRAM Frequency                  Ghz          1.21
+    SM Frequency                    Mhz        765.00
+    Elapsed Cycles                cycle    12,855,220
+    Memory Throughput                 %         40.14
+    DRAM Throughput                   %         13.08
+    Duration                         ms         16.80
+    L1/TEX Cache Throughput           %         40.24
+    L2 Cache Throughput               %         23.32
+    SM Active Cycles              cycle 12,838,979.94
+    Compute (SM) Throughput           %         62.93
+    ----------------------- ----------- -------------
+
+    OPT   Compute is more heavily utilized than Memory: Look at the Compute Workload Analysis section to see what the   
+          compute pipelines are spending their time doing. Also, consider whether any computation is redundant and      
+          could be reduced or moved to look-up tables.                                                                  
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   256
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                  1,024
+    Registers Per Thread             register/thread              32
+    Shared Memory Configuration Size           Kbyte          102.40
+    Driver Shared Memory Per Block       Kbyte/block            1.02
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block            4.11
+    # SMs                                         SM             108
+    Stack Size                                                 1,024
+    Threads                                   thread         262,144
+    # TPCs                                                        54
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                1.19
+    -------------------------------- --------------- ---------------
+
+    OPT   Est. Speedup: 50%                                                                                             
+          A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the    
+          target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical       
+          occupancy of the kernel. This kernel launch results in 1 full waves and a partial wave of 160 thread blocks.  
+          Under the assumption of a uniform execution duration of all thread blocks, this partial wave may account for  
+          up to 50.0% of the total runtime of this kernel. Try launching a grid with no partial wave. The overall       
+          impact of this tail effect also lessens with the number of full waves executed for a grid. See the Hardware   
+          Model (https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-hw-model) description for     
+          more details on launch configurations.                                                                        
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           32
+    Block Limit Registers                 block            8
+    Block Limit Shared Mem                block           19
+    Block Limit Warps                     block            8
+    Theoretical Active Warps per SM        warp           64
+    Theoretical Occupancy                     %          100
+    Achieved Occupancy                        %       100.01
+    Achieved Active Warps Per SM           warp        64.00
+    ------------------------------- ----------- ------------
+
+    Section: GPU and Memory Workload Distribution
+    -------------------------- ----------- -------------
+    Metric Name                Metric Unit  Metric Value
+    -------------------------- ----------- -------------
+    Average DRAM Active Cycles       cycle  2,669,797.80
+    Total DRAM Elapsed Cycles        cycle   816,682,496
+    Average L1 Active Cycles         cycle 12,838,979.94
+    Total L1 Elapsed Cycles          cycle 1,389,948,232
+    Average L2 Active Cycles         cycle 12,047,709.55
+    Total L2 Elapsed Cycles          cycle   967,922,400
+    Average SM Active Cycles         cycle 12,838,979.94
+    Total SM Elapsed Cycles          cycle 1,389,948,232
+    Average SMSP Active Cycles       cycle 12,860,315.16
+    Total SMSP Elapsed Cycles        cycle 5,559,792,928
+    -------------------------- ----------- -------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+  hashIndex_for_large_degree(GraphGPU, unsigned long long *, int *, int *, int, int, int, int *) (1024, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.0
+    Section: Command line profiler metrics
+    ----------------------------------------------- ----------- --------------
+    Metric Name                                     Metric Unit   Metric Value
+    ----------------------------------------------- ----------- --------------
+    l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum              3,613,125,837
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum       sector 11,577,469,824
+    ----------------------------------------------- ----------- --------------
+
+  binarySearch_for_small_degree(GraphGPU, unsigned long long *, int *, int *, int) (1024, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.0
+    Section: Command line profiler metrics
+    ----------------------------------------------- ----------- ------------
+    Metric Name                                     Metric Unit Metric Value
+    ----------------------------------------------- ----------- ------------
+    l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum              167,984,373
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum       sector  258,444,063
+    ----------------------------------------------- ----------- ------------
+
+
+  triangle_counting_dense_with_shared_memory_cuckoo(unsigned int, unsigned long long *, unsigned int *, unsigned int *, unsigned int, unsigned int *, unsigned int *, unsigned long *, unsigned int *, unsigned int) (432, 1, 1)x(512, 1, 1), Context 1, Stream 13, Device 0, CC 8.0
+    Section: Command line profiler metrics
+    ----------------------------------------------- ----------- --------------
+    Metric Name                                     Metric Unit   Metric Value
+    ----------------------------------------------- ----------- --------------
+    l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum              5,472,656,597
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum       sector 20,560,862,660
+    ----------------------------------------------- ----------- --------------
+
+  triangle_counting_sparse_with_subwarp(unsigned int, unsigned long long *, unsigned int *, unsigned int *, unsigned int, unsigned long *, unsigned int *, unsigned int) (216, 1, 1)x(1024, 1, 1), Context 1, Stream 13, Device 0, CC 8.0
+    Section: Command line profiler metrics
+    ----------------------------------------------- ----------- -------------
+    Metric Name                                     Metric Unit  Metric Value
+    ----------------------------------------------- ----------- -------------
+    l1tex__t_requests_pipe_lsu_mem_global_op_ld.sum               480,106,623
+    l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum       sector 1,596,889,594
+    ----------------------------------------------- ----------- -------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  triangle_counting_dense_with_shared_memory_cuckoo(unsigned int, unsigned long long *, unsigned int *, unsigned int *, unsigned int, unsigned int *, unsigned int *, unsigned long *, unsigned int *, unsigned int) (432, 1, 1)x(512, 1, 1), Context 1, Stream 13, Device 0, CC 8.0
+    Section: Command line profiler metrics
+    -------------------------------------------------------- ----------- ----------------
+    Metric Name                                              Metric Unit     Metric Value
+    -------------------------------------------------------- ----------- ----------------
+    l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum               19,425,064,049
+    l1tex__data_bank_reads.avg                                           4,084,220,992.20
+    l1tex__data_bank_reads.max                                              4,117,932,582
+    l1tex__data_bank_reads.min                                              4,042,473,446
+    l1tex__data_bank_reads.sum                                            441,095,867,158
+    -------------------------------------------------------- ----------- ----------------
+
+  triangle_counting_sparse_with_subwarp(unsigned int, unsigned long long *, unsigned int *, unsigned int *, unsigned int, unsigned long *, unsigned int *, unsigned int) (216, 1, 1)x(1024, 1, 1), Context 1, Stream 13, Device 0, CC 8.0
+    Section: Command line profiler metrics
+    -------------------------------------------------------- ----------- -------------
+    Metric Name                                              Metric Unit  Metric Value
+    -------------------------------------------------------- ----------- -------------
+    l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum                       149
+    l1tex__data_bank_reads.avg                                           21,348,080.56
+    l1tex__data_bank_reads.max                                              21,767,946
+    l1tex__data_bank_reads.min                                              20,926,892
+    l1tex__data_bank_reads.sum                                           2,305,592,700
+    -------------------------------------------------------- ----------- -------------
+
+  hashIndex_for_large_degree(GraphGPU, unsigned long long *, int *, int *, int, int, int, int *) (1024, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.0
+    Section: Command line profiler metrics
+    -------------------------------------------------------- ----------- ----------------
+    Metric Name                                              Metric Unit     Metric Value
+    -------------------------------------------------------- ----------- ----------------
+    l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum                9,105,053,882
+    l1tex__data_bank_reads.avg                                           2,013,874,332.26
+    l1tex__data_bank_reads.max                                              2,061,671,714
+    l1tex__data_bank_reads.min                                              1,977,379,726
+    l1tex__data_bank_reads.sum                                            217,498,427,884
+    -------------------------------------------------------- ----------- ----------------
+
+  binarySearch_for_small_degree(GraphGPU, unsigned long long *, int *, int *, int) (1024, 1, 1)x(256, 1, 1), Context 1, Stream 7, Device 0, CC 8.0
+    Section: Command line profiler metrics
+    -------------------------------------------------------- ----------- -------------
+    Metric Name                                              Metric Unit  Metric Value
+    -------------------------------------------------------- ----------- -------------
+    l1tex__data_bank_conflicts_pipe_lsu_mem_shared_op_ld.sum                 4,378,461
+    l1tex__data_bank_reads.avg                                           13,496,156.04
+    l1tex__data_bank_reads.max                                              14,300,782
+    l1tex__data_bank_reads.min                                              13,272,586
+    l1tex__data_bank_reads.sum                                           1,457,584,852
+    -------------------------------------------------------- ----------- -------------

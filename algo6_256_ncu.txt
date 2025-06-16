@@ -1,0 +1,89 @@
+start read csr bin file....uintV_size=4,uintE_size=8
+vertex_count=8860450,edge_count=520523686
+finish read csr bin file, elapsed_time=8670.42ms
+520523686
+1926
+==PROF== Connected to process 3262719 (/home/xuzicang/BFSM/GraphChallenge/Ours/triangle)
+0x7f55da805400
+189701
+8670749
+==PROF== Profiling "triangle_counting_dense_with_..." - 0: 0%
+==WARNING== Backing up device memory in system memory. Kernel replay might be slow. Consider using "--replay-mode application" to avoid memory save-and-restore.
+....50%....100% - 11 passes
+hash_table_total_size: 4908845
+9289046193
+30789.9ms
+==PROF== Disconnected from process 3262719
+[3262719] triangle@127.0.0.1
+  triangle_counting_dense_with_hash1(unsigned int, unsigned long long *, unsigned int *, unsigned int *, unsigned int, unsigned int *, unsigned int *, unsigned long *, unsigned int *, unsigned int) (432, 1, 1)x(512, 1, 1), Context 1, Stream 13, Device 0, CC 8.0
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- --------------
+    Metric Name             Metric Unit   Metric Value
+    ----------------------- ----------- --------------
+    DRAM Frequency                  Ghz           1.51
+    SM Frequency                    Ghz           1.06
+    Elapsed Cycles                cycle    643,942,297
+    Memory Throughput                 %          34.32
+    DRAM Throughput                   %          20.53
+    Duration                         ms         604.64
+    L1/TEX Cache Throughput           %          34.80
+    L2 Cache Throughput               %          27.82
+    SM Active Cycles              cycle 636,503,988.57
+    Compute (SM) Throughput           %          71.50
+    ----------------------- ----------- --------------
+
+    OPT   Compute is more heavily utilized than Memory: Look at the Compute Workload Analysis section to see what the   
+          compute pipelines are spending their time doing. Also, consider whether any computation is redundant and      
+          could be reduced or moved to look-up tables.                                                                  
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   512
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    432
+    Registers Per Thread             register/thread              25
+    Shared Memory Configuration Size           Kbyte          135.17
+    Driver Shared Memory Per Block       Kbyte/block            1.02
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block           26.76
+    # SMs                                         SM             108
+    Stack Size                                                 1,024
+    Threads                                   thread         221,184
+    # TPCs                                                        54
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                   1
+    -------------------------------- --------------- ---------------
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           32
+    Block Limit Registers                 block            4
+    Block Limit Shared Mem                block            4
+    Block Limit Warps                     block            4
+    Theoretical Active Warps per SM        warp           64
+    Theoretical Occupancy                     %          100
+    Achieved Occupancy                        %        98.79
+    Achieved Active Warps Per SM           warp        63.23
+    ------------------------------- ----------- ------------
+
+    Section: GPU and Memory Workload Distribution
+    -------------------------- ----------- ---------------
+    Metric Name                Metric Unit    Metric Value
+    -------------------------- ----------- ---------------
+    Average DRAM Active Cycles       cycle  187,728,302.70
+    Total DRAM Elapsed Cycles        cycle  36,568,706,048
+    Average L1 Active Cycles         cycle  636,503,988.57
+    Total L1 Elapsed Cycles          cycle  69,703,547,648
+    Average L2 Active Cycles         cycle  615,423,281.42
+    Total L2 Elapsed Cycles          cycle  49,338,656,720
+    Average SM Active Cycles         cycle  636,503,988.57
+    Total SM Elapsed Cycles          cycle  69,703,547,648
+    Average SMSP Active Cycles       cycle  636,490,245.06
+    Total SMSP Elapsed Cycles        cycle 278,814,190,592
+    -------------------------- ----------- ---------------
+

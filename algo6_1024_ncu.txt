@@ -1,0 +1,110 @@
+start read csr bin file....uintV_size=4,uintE_size=8
+vertex_count=8860450,edge_count=520523686
+finish read csr bin file, elapsed_time=8573.6ms
+520523686
+1926
+==PROF== Connected to process 3154382 (/home/xuzicang/BFSM/GraphChallenge/Ours/triangle)
+0x7f054a805400
+11726
+8848724
+==PROF== Profiling "triangle_counting_dense_with_..." - 0: 0%
+==WARNING== Backing up device memory in system memory. Kernel replay might be slow. Consider using "--replay-mode application" to avoid memory save-and-restore.
+....50%....100% - 11 passes
+hash_table_total_size: 609192
+3631099813
+26104.9ms
+==PROF== Disconnected from process 3154382
+[3154382] triangle@127.0.0.1
+  triangle_counting_dense_with_hash1(unsigned int, unsigned long long *, unsigned int *, unsigned int *, unsigned int, unsigned int *, unsigned int *, unsigned long *, unsigned int *, unsigned int) (432, 1, 1)x(512, 1, 1), Context 1, Stream 13, Device 0, CC 8.0
+    Section: GPU Speed Of Light Throughput
+    ----------------------- ----------- --------------
+    Metric Name             Metric Unit   Metric Value
+    ----------------------- ----------- --------------
+    DRAM Frequency                  Ghz           1.51
+    SM Frequency                    Ghz           1.06
+    Elapsed Cycles                cycle    201,418,634
+    Memory Throughput                 %          20.51
+    DRAM Throughput                   %           6.67
+    Duration                         ms         189.13
+    L1/TEX Cache Throughput           %          29.47
+    L2 Cache Throughput               %          10.29
+    SM Active Cycles              cycle 142,127,386.24
+    Compute (SM) Throughput           %          40.57
+    ----------------------- ----------- --------------
+
+    OPT   This workload exhibits low compute throughput and memory bandwidth utilization relative to the peak           
+          performance of this device. Achieved compute throughput and/or memory bandwidth below 60.0% of peak           
+          typically indicate latency issues. Look at Scheduler Statistics and Warp State Statistics for potential       
+          reasons.                                                                                                      
+
+    Section: Launch Statistics
+    -------------------------------- --------------- ---------------
+    Metric Name                          Metric Unit    Metric Value
+    -------------------------------- --------------- ---------------
+    Block Size                                                   512
+    Function Cache Configuration                     CachePreferNone
+    Grid Size                                                    432
+    Registers Per Thread             register/thread              25
+    Shared Memory Configuration Size           Kbyte          135.17
+    Driver Shared Memory Per Block       Kbyte/block            1.02
+    Dynamic Shared Memory Per Block       byte/block               0
+    Static Shared Memory Per Block       Kbyte/block           26.76
+    # SMs                                         SM             108
+    Stack Size                                                 1,024
+    Threads                                   thread         221,184
+    # TPCs                                                        54
+    Enabled TPC IDs                                              all
+    Uses Green Context                                             0
+    Waves Per SM                                                   1
+    -------------------------------- --------------- ---------------
+
+    Section: Occupancy
+    ------------------------------- ----------- ------------
+    Metric Name                     Metric Unit Metric Value
+    ------------------------------- ----------- ------------
+    Block Limit SM                        block           32
+    Block Limit Registers                 block            4
+    Block Limit Shared Mem                block            4
+    Block Limit Warps                     block            4
+    Theoretical Active Warps per SM        warp           64
+    Theoretical Occupancy                     %          100
+    Achieved Occupancy                        %        67.95
+    Achieved Active Warps Per SM           warp        43.49
+    ------------------------------- ----------- ------------
+
+    OPT   Est. Local Speedup: 32.05%                                                                                    
+          The difference between calculated theoretical (100.0%) and measured achieved occupancy (68.0%) can be the     
+          result of warp scheduling overheads or workload imbalances during the kernel execution. Load imbalances can   
+          occur between warps within a block as well as across blocks of the same kernel. See the CUDA Best Practices   
+          Guide (https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy) for more details on     
+          optimizing occupancy.                                                                                         
+
+    Section: GPU and Memory Workload Distribution
+    -------------------------- ----------- --------------
+    Metric Name                Metric Unit   Metric Value
+    -------------------------- ----------- --------------
+    Average DRAM Active Cycles       cycle  19,059,925.60
+    Total DRAM Elapsed Cycles        cycle 11,438,344,704
+    Average L1 Active Cycles         cycle 142,127,386.24
+    Total L1 Elapsed Cycles          cycle 22,056,428,750
+    Average L2 Active Cycles         cycle 166,721,137.85
+    Total L2 Elapsed Cycles          cycle 15,432,620,720
+    Average SM Active Cycles         cycle 142,127,386.24
+    Total SM Elapsed Cycles          cycle 22,056,428,750
+    Average SMSP Active Cycles       cycle 142,084,921.80
+    Total SMSP Elapsed Cycles        cycle 88,225,715,000
+    -------------------------- ----------- --------------
+
+    OPT   Est. Speedup: 20.49%                                                                                          
+          One or more SMs have a much lower number of active cycles than the average number of active cycles. Maximum   
+          instance value is 29.44% above the average, while the minimum instance value is 48.37% below the average.     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Speedup: 21.47%                                                                                          
+          One or more SMSPs have a much lower number of active cycles than the average number of active cycles. Maximum 
+          instance value is 30.86% above the average, while the minimum instance value is 48.74% below the average.     
+    ----- --------------------------------------------------------------------------------------------------------------
+    OPT   Est. Speedup: 20.49%                                                                                          
+          One or more L1 Slices have a much lower number of active cycles than the average number of active cycles.     
+          Maximum instance value is 29.44% above the average, while the minimum instance value is 48.37% below the      
+          average.                                                                                                      
+

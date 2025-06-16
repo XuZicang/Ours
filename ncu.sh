@@ -1,0 +1,1 @@
+/usr/local/cuda-12.1/bin/ncu ./triangle -f ../../GraphChallengeData/graph500/graph500-scale24-ef16.bin -algo 1 -dense 32
