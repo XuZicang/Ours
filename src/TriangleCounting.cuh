@@ -86,7 +86,9 @@ __forceinline__ __device__ void load_neighbor_list(uintV *dst, const uintV *src,
 
 __forceinline__ __device__ void load_neighbor_list_warp(uintV *dst, uintV *src, uintV src_size)
 {
-    dst[threadIdinWarp] = src[threadIdinWarp];
+    for (uint32_t i = threadIdinWarp; i < src_size; i += 32)
+        dst[i] = src[i];
+    __syncwarp();
 }
 
 __forceinline__ __device__ void load_neighbor_list_group(uintV *dst, uintV *src, uintV src_size, thread_group group)
@@ -176,7 +178,7 @@ __global__ void
             uintV chunk_size)
 {
     __shared__ uint64_t warpCounter[32];
-    __shared__ uintV shared_list[32 * 32];
+    __shared__ uintV shared_list[32 * 256];
     __shared__ uintV chunk_start[32];
     __shared__ uintV chunk_end[32];
     warpCounter[warpIdinBlock] = 0;
@@ -198,14 +200,15 @@ __global__ void
         {
             uintV u = sparse_root[i];
             uintV neighbor_num = row_ptrs[u + 1] - row_ptrs[u];
-            if (threadIdinWarp < neighbor_num)
-                shared_list[warpIdinBlock * 32 + threadIdinWarp] = cols[row_ptrs[u] + threadIdinWarp];
+            load_neighbor_list_warp(shared_list + warpIdinBlock * 256, cols + row_ptrs[u], neighbor_num);
+            // if (threadIdinWarp < neighbor_num)
+            //     shared_list[warpIdinBlock * 32 + threadIdinWarp] = cols[row_ptrs[u] + threadIdinWarp];
             for (uintE j = 1; j < neighbor_num; j++)
             {
-                uintV v = shared_list[warpIdinBlock * 32 + j];
+                uintV v = shared_list[warpIdinBlock * 256 + j];
                 if (v == 0xFFFFFFFFU)
                     break;
-                uintV count = BinaryIntersectionCountAligned(shared_list + warpIdinBlock * 32, cols + row_ptrs[v], j, row_ptrs[v + 1] - row_ptrs[v]);
+                uintV count = BinaryIntersectionCountAligned(shared_list + warpIdinBlock * 256, cols + row_ptrs[v], j, row_ptrs[v + 1] - row_ptrs[v]);
                 // uintV count = BinaryIntersectionCountAligned(cols + row_ptrs[v], shared_list + warpIdinBlock * 32, row_ptrs[v + 1] - row_ptrs[v],  neighbor_num);
                 if (threadIdinWarp == 0)
                     warpCounter[warpIdinBlock] += count;

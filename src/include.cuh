@@ -13,6 +13,8 @@
 #include "Induce.cuh"
 #include "Cuckoo.cuh"
 #include "HashGraph.cuh"
+#include "EdgeCentric.cuh"
+#include "DFS.cuh"
 #include "utils/DeviceArray.cuh"
 #include "utils/DeviceManager.h"
 #include "utils/GPUProfiler.cuh"

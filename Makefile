@@ -17,7 +17,7 @@ OPEN_FLAGS=-DOPENMP -Xcompiler -fopenmp -lgomp -lpthread
 BACKTRACE_FLAGS = -Xcompiler -rdynamic
 
 
-CFLAGS += -O3 -Xptxas=-v -std=c++17 -DUNTRACK_ALLOC_LARGE_VERTEX_NUM -DPTHREAD_LOCK \
+CFLAGS +=  -O3 -Xptxas=-v -std=c++17 -DUNTRACK_ALLOC_LARGE_VERTEX_NUM -DPTHREAD_LOCK \
 					-DCUDA_CONTEXT_PROFILE \
 					# -DPROFILE -DCUDA_CONTEXT_PROFILE \
 					#-DDEBUG  \
@@ -25,10 +25,19 @@ CFLAGS += -O3 -Xptxas=-v -std=c++17 -DUNTRACK_ALLOC_LARGE_VERTEX_NUM -DPTHREAD_L
 ARCH = -arch=sm_80
 
 .PHONY:all
-all: triangle
+all: triangle general
 
 triangle: triangle.cu
 	$(NVCC) $(CFLAGS) ${OPEN_FLAGS} ${MGPU_FLAGS} ${ARCH} $(INCLUDE) -o $@ $^ $(LIBS)
 
+triangle-gdb: triangle.cu
+	$(NVCC) -g -G $(CFLAGS) ${OPEN_FLAGS} ${MGPU_FLAGS} ${ARCH} $(INCLUDE) -o $@ $^ $(LIBS)
+	
+general: general.cu
+	$(NVCC) $(CFLAGS) ${OPEN_FLAGS} ${MGPU_FLAGS} ${ARCH} $(INCLUDE) -o $@ $^ $(LIBS)
+
+general-gdb: general.cu
+	$(NVCC) -g -G $(CFLAGS) ${OPEN_FLAGS} ${MGPU_FLAGS} ${ARCH} $(INCLUDE) -o $@ $^ $(LIBS)
+
 clean:
-	rm triangle
+	rm triangle general

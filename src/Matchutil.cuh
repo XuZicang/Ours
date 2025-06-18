@@ -5,6 +5,18 @@
 #include <cooperative_groups.h>
 #include <cooperative_groups/reduce.h>
 using namespace cooperative_groups;
+
+__device__ void printArray(const uint32_t *array, uint32_t size)
+{
+    if (threadIdinWarp == 0)
+        printf("size: %d\n", size);
+    __syncwarp();
+    for (int i = threadIdinWarp; i < (size); i += 32)
+    {
+        printf("%d\n", array[i]);
+    }
+    __syncwarp();
+}
 __forceinline__ __device__ void load_init_match(uintE &init_match_pointer, uintE *allocator)
 {
     if (threadIdinWarp == 0)
@@ -59,6 +71,61 @@ __forceinline__ __device__ int BinarySearchPosition(uintV vid, uintV *array, uin
     }
     return result;
 }
+
+__forceinline__ __device__ void BinaryIntersectionUpperbound(
+    uintV* arrayA,
+    uintV* arrayB,
+    uintV* writeArray,
+    uintV sizeA,
+    uintV sizeB,
+    uintV& result_size,
+    uintV upperbound
+)
+{
+    result_size = 0;
+    for (uint32_t i = threadIdinWarp; i < sizeA; i += 32)
+    {
+        uintV v = arrayA[i];
+        if (v >= upperbound) break;
+        bool exist = BinarySearch(v, arrayB, sizeB);
+        if (exist)
+        {
+            coalesced_group active = cooperative_groups::coalesced_threads();
+            writeArray[result_size + active.thread_rank()] = arrayA[i];
+        }
+        result_size += __reduce_add_sync(__activemask(), exist);
+    }
+    return;
+}
+
+__forceinline__ __device__ void BinaryExclusionUpperbound(uintV* arrayA, const uintV* arrayB, uintV* writeArray, uintV sizeA, uintV sizeB, uintV& result_size, uintV upperbound)
+{
+    result_size = 0;
+    if (warpId == 0) {
+    printArray(arrayA, sizeA);
+    printArray(arrayB, sizeB);
+    }
+    for (uint32_t i = threadIdinWarp; i < sizeA; i += 32)
+    {
+        uintV v = arrayA[i];
+        if (v >= upperbound) break;
+        bool not_exist = !BinarySearch(v, arrayB, sizeB);
+        // if (warpId == 0)
+        //     printf("%d %d\n", v, not_exist);
+        if (not_exist)
+        {
+            coalesced_group active = cooperative_groups::coalesced_threads();
+            writeArray[result_size + active.thread_rank()] = arrayA[i];
+        }
+        result_size += __reduce_add_sync(__activemask(), not_exist);
+    }
+    if (warpId == 0)
+    {
+        printArray(writeArray, result_size);
+    }
+    return;
+}
+
 __forceinline__ __device__ void BinaryIntersection(uintV *arrayA, uintV *arrayB, uintV &sizeA, uintV sizeB)
 {
     uintV write_pos = 0;
@@ -281,11 +348,3 @@ __forceinline__ __device__ void FindFirstOneBinary(uint32_t *bits, uint32_t indS
     return;
 }
 
-__device__ void printArray(uint32_t *array, uint32_t size)
-{
-    for (int i = threadIdinWarp; i < (size + 31) / 32; i += 32)
-    {
-        printf("%x\n", array[i]);
-    }
-    __syncwarp();
-}

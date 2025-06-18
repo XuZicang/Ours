@@ -401,7 +401,7 @@ __forceinline__ __device__ void extendWithOffload(
     __syncthreads();
 }
 
-__launch_bounds__(1024, 1)
+__launch_bounds__(1024, 2)
     __global__ void EdgeCentricDFSBalancedKernel(
         uintV vertex_count,
         uintE *row_ptrs,

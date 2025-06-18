@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     HashGraph* middle_hashgraph;
     if (algorithm == 5) hashgraph = new HashGraph(&data_graph, context);
     if (algorithm == 6) hashgraph = new HashGraph(&data_graph, dense_vertex.data(), dense_vertex.size(), context);
-    if (algorithm == 10) {
+    if (algorithm == 10 || algorithm == 11) {
         dense_hashgraph = new HashGraph(&data_graph, dense_vertex.data(), dense_vertex.size(), context);
         middle_hashgraph = new HashGraph(&data_graph, middle_vertex.data(), middle_vertex.size(), context);
     }
@@ -321,6 +321,42 @@ int main(int argc, char *argv[])
         //     global_allocator_sparse->GetArray(),
         //     sparse_chunk
         // );
+    }
+    else if (algorithm == 11)
+    {
+        triangle_counting_with_hash1<<<432, 512, 0, stream>>>(
+            data_graph.GetVertexCount(),
+            gpu_aligned_graph->GetRowPtrs(),
+            gpu_aligned_graph->GetCols(),
+            dense_vertices->GetArray(),
+            dense_vertex.size(),
+            dense_hashgraph->GetTableSizes(),
+            dense_hashgraph->GetHashTables(),
+            Counter->GetArray(),
+            global_allocator->GetArray(),
+            dense_chunk
+        );
+        triangle_counting_with_hash_prefetch<<<432, 512, 0, stream>>> (
+            data_graph.GetVertexCount(),
+            gpu_aligned_graph->GetRowPtrs(),
+            gpu_aligned_graph->GetCols(),
+            middle_hashgraph->GetTableSizes(),
+            middle_hashgraph->GetHashTables(),
+            middle_vertices->GetArray(),
+            middle_vertex.size(),
+            Counter->GetArray(),
+            global_allocator_middle->GetArray(),
+            middle_chunk
+        );
+        triangle_counting_sparse_with_subwarp<<<216, 1024, 0, stream>>>(
+            data_graph.GetVertexCount(),
+            gpu_graph->GetRowPtrs(),
+            gpu_graph->GetCols(),
+            sparse_vertices->GetArray(),
+            sparse_vertex.size(),
+            Counter->GetArray(),
+            global_allocator_sparse->GetArray(),
+            sparse_chunk);
     }
     CUDA_ERROR(cudaStreamSynchronize(stream));
     timer.EndTimer();

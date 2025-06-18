@@ -158,3 +158,166 @@ __launch_bounds__(1024, 1)
 }
 
 
+struct MatchInfo {
+    uintE* row_ptrs;
+    uintV* cols;
+    uintV* stacks;
+    uint8_t q_row_ptrs[16];
+    uint8_t q_cols[48];
+    uint8_t q_restriction[16];
+    uintV* init_tasks;
+    uintE init_task_num;
+    uintV dg_vertex_count;
+    uint32_t stack_layer_size;
+    uint8_t q_vertex_count;
+    uint8_t init_layer;
+};
+
+__forceinline__ __device__ void loadMatchInfo(
+    MatchInfo& shared_info,
+    MatchInfo* global_info
+)
+{
+    uint32_t size = sizeof(shared_info);
+    if (threadIdx.x < (size + 3) / 4)
+    {
+        ((uint32_t*)(&shared_info))[threadIdx.x] = ((uint32_t*)(global_info))[threadIdx.x];
+    }
+    __syncthreads();
+}
+
+
+
+__forceinline__ __device__ void warpExtend(
+    MatchInfo& info,
+    uint64_t& warpCounter,
+    uintV* warpStack,
+    uint32_t* stack_iter,
+    uint32_t* stack_size,
+    uintV* partial_match,
+    uint8_t partial_match_size,
+    uint64_t& timeCounter
+)
+{
+    uint8_t current_mapping_vertex = partial_match_size;
+    while(true)
+    {
+        uintV* stack_array = warpStack + current_mapping_vertex * info.stack_layer_size;
+        uint8_t parent_start = info.q_row_ptrs[current_mapping_vertex];
+        uint8_t parent_num = info.q_row_ptrs[current_mapping_vertex + 1] - parent_start;
+        uintV vid_upper_bound = info.q_restriction[current_mapping_vertex] == 0xFF? 0xFFFFFFFFU : partial_match[info.q_restriction[current_mapping_vertex]];
+        uintV pivot_vid = partial_match[info.q_cols[parent_start]];
+        uintV degree = info.row_ptrs[pivot_vid + 1] - info.row_ptrs[pivot_vid];
+        uintV* pivot_start = info.cols + info.row_ptrs[pivot_vid];
+        // BinaryExclusionUpperbound(info.cols + info.row_ptrs[pivot_vid], 
+        //         partial_match, 
+        //         stack_array, 
+        //         info.row_ptrs[pivot_vid + 1] - info.row_ptrs[pivot_vid], 
+        //         current_mapping_vertex, 
+        //         stack_size[current_mapping_vertex], 
+        //         vid_upper_bound);
+        stack_size[current_mapping_vertex] = 0;
+        for (uintV i = threadIdinWarp; i < degree; i += 32)
+        {
+            uintV vid = pivot_start[i];
+            if (vid >= vid_upper_bound) break;
+            bool not_exist = true;
+            for (uint8_t j = 0 ; j < current_mapping_vertex; j ++)
+            {
+                if (vid == partial_match[j]) {
+                    not_exist = false;
+                    break;
+                }
+            }
+            __syncwarp(__activemask());
+            if (not_exist)
+            {
+                coalesced_group active = cooperative_groups::coalesced_threads();
+                stack_array[stack_size[current_mapping_vertex] + active.thread_rank()] = vid;
+            }
+            stack_size[current_mapping_vertex] += __reduce_add_sync(__activemask(), not_exist);
+        }
+        
+        for (uint8_t parent = parent_start + 1; parent < parent_start + parent_num; parent++)
+        {
+            uintV bckNeighbor = partial_match[info.q_cols[parent]];
+            BinaryIntersection(stack_array, info.cols + info.row_ptrs[bckNeighbor], stack_size[current_mapping_vertex], info.row_ptrs[bckNeighbor + 1] - info.row_ptrs[bckNeighbor]);
+            __syncwarp();
+        }
+        if (current_mapping_vertex == info.q_vertex_count - 1 || stack_size[current_mapping_vertex] == 0)
+        {
+            if (threadIdinWarp == 0)
+            {
+                warpCounter += stack_size[current_mapping_vertex];
+            }
+            __syncwarp();
+            current_mapping_vertex--;
+            while (current_mapping_vertex >= partial_match_size && stack_iter[current_mapping_vertex] >= stack_size[current_mapping_vertex] - 1)
+            {
+                current_mapping_vertex--;
+            }
+            if (current_mapping_vertex < partial_match_size) break;
+            stack_iter[current_mapping_vertex] = stack_iter[current_mapping_vertex] + 1;
+            partial_match[current_mapping_vertex] = warpStack[current_mapping_vertex * info.stack_layer_size + stack_iter[current_mapping_vertex]];
+            current_mapping_vertex++;
+        }
+        else
+        {
+            stack_iter[current_mapping_vertex] = 0;
+            partial_match[current_mapping_vertex] = warpStack[(current_mapping_vertex) * info.stack_layer_size];
+            current_mapping_vertex++;
+        }
+    }
+    return;
+}
+
+__launch_bounds__(1024, 2)
+    __global__ void DFSWarpKernel(
+        MatchInfo* info,
+        uint64_t* global_allocator,
+        uint64_t* Counter)
+{
+    __shared__ uintV partial_match[WARP_PER_BLOCK * MAX_QUERY_VERTEX];
+    __shared__ uint32_t stack_iter[WARP_PER_BLOCK * MAX_QUERY_VERTEX];
+    __shared__ uint32_t stack_size[WARP_PER_BLOCK * MAX_QUERY_VERTEX];
+    __shared__ uint64_t warpCounter[WARP_PER_BLOCK];
+    __shared__ uint64_t timeCounter[WARP_PER_BLOCK];
+    __shared__ MatchInfo shared_info;
+    warpCounter[warpIdinBlock] = 0;
+    loadMatchInfo(shared_info, info);
+    uintE init_match_pointer;
+    if (threadIdinWarp == 0)
+    {
+        init_match_pointer = atomicAdd((unsigned long long*)global_allocator, 1UL);
+    }
+    init_match_pointer = __shfl_sync(0xFFFFFFFF, init_match_pointer, 0);
+    while(true)
+    {
+        if (init_match_pointer >= shared_info.init_task_num) {
+            if (threadIdinWarp == 0)
+            {
+                atomicAdd((unsigned long long*) Counter, warpCounter[warpIdinBlock]);
+            }
+            break;
+        }
+        if (threadIdinWarp < shared_info.init_layer)
+        {
+            partial_match[warpIdinBlock * MAX_QUERY_VERTEX + threadIdinWarp] = shared_info.init_tasks[init_match_pointer * shared_info.init_layer + threadIdinWarp];
+        }
+        warpExtend(shared_info, 
+            warpCounter[warpIdinBlock], 
+            shared_info.stacks + warpId * shared_info.q_vertex_count * shared_info.stack_layer_size, 
+            stack_iter + warpIdinBlock * MAX_QUERY_VERTEX, 
+            stack_size + warpIdinBlock * MAX_QUERY_VERTEX,
+            partial_match + warpIdinBlock * MAX_QUERY_VERTEX,
+            shared_info.init_layer,
+            timeCounter[warpIdinBlock]
+        );
+        if (threadIdinWarp == 0)
+        {
+            init_match_pointer = atomicAdd((unsigned long long*)global_allocator, 1UL);
+        }
+        init_match_pointer = __shfl_sync(0xFFFFFFFF, init_match_pointer, 0);
+    }
+    return;
+}
