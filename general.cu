@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
     uintE init_task_num = init_oriented? data_graph.GetEdgeCount() / 2 : data_graph.GetEdgeCount();
     DeviceArray<uint64_t> *global_allocator = new DeviceArray<uint64_t>(1, context);
     DeviceArray<uint64_t> *Counter = new DeviceArray<uint64_t>(1, context);
+    DeviceArray<uint32_t> *IdleWarpCounter = new DeviceArray<uint32_t>(1, context);
     DeviceArray<uintV> *BFSlayer = new DeviceArray<uintV>(216 * (data_graph.GetMaxDegree() + 1023) / 1024 * 1024, context);
     DeviceArray<uintV> *init_match = new DeviceArray<uintV>(init_task_num * init_layer, context);
     uintV* cpu_init_match = new uintV[init_task_num * init_layer];
@@ -60,9 +61,21 @@ int main(int argc, char *argv[])
     HToD<uintV>(init_match->GetArray(), cpu_init_match, init_task_num * init_layer);
     CUDA_ERROR(cudaMemset(global_allocator->GetArray(), 0, sizeof(uint64_t)));
     CUDA_ERROR(cudaMemset(Counter->GetArray(), 0, sizeof(uint64_t)));
+    CUDA_ERROR(cudaMemset(IdleWarpCounter->GetArray(), 0, sizeof(uint32_t)));
 
     Stack stack(WARP_PER_BLOCK * 216, data_graph.GetMaxDegree(), query_graph.GetVertexCount(), context);
     WorkerQueue *queue = init_device_WorkerQueue(216 * 32, context);
+    TaskQueue* task_queue = new TaskQueue;
+    int max_queue_size = 65536 * 1024;
+    task_queue->queue_size = max_queue_size;
+    task_queue->head = 0;
+    task_queue->tail = 0;
+    task_queue->task_count = 0;
+    DeviceArray<Task1>* tasks = new DeviceArray<Task1>(max_queue_size, context);
+    CUDA_ERROR(cudaMemset(tasks->GetArray(), 0, sizeof(Task) * max_queue_size));
+    task_queue->tasks = tasks->GetArray();
+    DeviceArray<TaskQueue>* gpu_task_queue = new DeviceArray<TaskQueue>(1, context);
+    HToD<TaskQueue>(gpu_task_queue->GetArray(), task_queue, 1);
     MatchInfo cpu_info;
     cpu_info.row_ptrs = gpu_graph->GetRowPtrs();
     cpu_info.cols = gpu_graph->GetCols();
@@ -74,6 +87,7 @@ int main(int argc, char *argv[])
     cpu_info.q_vertex_count = query_graph.GetVertexCount();
     cpu_info.init_layer = init_layer;
     cpu_info.q_row_ptrs[0] = 0;
+    cpu_info.task_queue = gpu_task_queue->GetArray();
     for (uint8_t i = 0; i < cpu_info.q_vertex_count; i++)
     {
         cpu_info.q_row_ptrs[i + 1] = gpu_query->GetCPURowPtrs()[i + 1];
@@ -85,6 +99,7 @@ int main(int argc, char *argv[])
     }
     DeviceArray<MatchInfo>* gpu_match_info = new DeviceArray<MatchInfo>(1, context);
     HToD<MatchInfo>(gpu_match_info->GetArray(), &cpu_info, 1);
+    DeviceArray<uint64_t>* profileCounter = new DeviceArray<uint64_t>(216 * 32, context);
     GPUTimer timer;
     cudaStream_t stream = CudaContextManager::GetCudaContextManager()->GetCudaContext(DEVICEIDX)->Stream();
     CUDA_ERROR(cudaStreamSynchronize(stream));
@@ -115,7 +130,18 @@ int main(int argc, char *argv[])
         DFSWarpKernel<<<216, 1024, 0, stream>>>(
             gpu_match_info->GetArray(),
             global_allocator->GetArray(),
-            Counter->GetArray()
+            Counter->GetArray(),
+            profileCounter->GetArray()
+        );
+    }
+    else if (algorithm == 2)
+    {
+        DFSWarpBalanceKernel<<<108, 1024, 0, stream>>>(
+            gpu_match_info->GetArray(),
+            global_allocator->GetArray(),
+            Counter->GetArray(),
+            profileCounter->GetArray(),
+            IdleWarpCounter->GetArray()
         );
     }
     CUDA_ERROR(cudaStreamSynchronize(stream));
@@ -123,6 +149,18 @@ int main(int argc, char *argv[])
     uint64_t counts;
     DToH<uint64_t>(&counts, Counter->GetArray(), 1);
     CUDA_ERROR(cudaStreamSynchronize(stream));
+    // profileCounter->Print();
+    uint32_t warpN = 216 * 32;
+    if (algorithm == 2) warpN = 108 * 32;
+    uint64_t* cpu_profileCounter = new uint64_t[warpN];
+    DToH<uint64_t>(cpu_profileCounter, profileCounter->GetArray(), warpN);
+    sort(cpu_profileCounter, cpu_profileCounter + warpN);
+    for (int i = 0; i < warpN; i ++)
+    {
+        if (i % 20 == 0) cout << endl;
+        cout << cpu_profileCounter[i] << " ";
+    }
+    cout << endl;
     cout << counts << endl;
     cout << timer.GetElapsedMilliSeconds() << "ms" << endl;
     // CPUMatch match(&data_graph, &query_graph);
