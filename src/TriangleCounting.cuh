@@ -874,7 +874,6 @@ __global__ void
                 load_neighbor_list_async(shared_list + (1 - read_list) * 512, cols + row_ptrs[root[i + 1]], row_ptrs[root[i + 1] + 1] - row_ptrs[root[i + 1]], 512);
                 load_hash_table_async(hash_table + (1 - read_list)* 32 * 64, hash_tables + hash_table_sizes[i + 1] * 32, hash_table_sizes[i + 2] - hash_table_sizes[i + 1], 512);
             }
-// #pragma unroll 4
             for (uint32_t j = warpIdinBlock + 1; j < degree; j+=16)
             {
                 uintV v = shared_list[j + read_list * 512];
@@ -890,3 +889,113 @@ __global__ void
     }
 }
 
+__forceinline__ __device__ uint32_t CompactHashIntersection(
+    const uintV* hash_table, 
+    uint32_t bin_num, 
+    const uintV* bucket_offsets, 
+    const uintV* array, 
+    uint32_t array_size)
+{
+    uint32_t count = 0;
+#pragma unroll
+    for (int i = threadIdinWarp; i < array_size; i += 32)
+    {
+        uintV vid = array[i];
+        uint32_t bin_id = hash1(vid) % bin_num;
+        for (uint j = bucket_offsets[bin_id]; j < bucket_offsets[bin_id + 1]; j++)
+        {
+            if (hash_table[j] >= vid) {
+                count += hash_table[j] == vid;
+                break;
+            }
+        }
+    }
+    return count;
+}
+
+__forceinline__ __device__ uint32_t CompactHashIntersectionWithPointer(
+    const uintV* hash_table, 
+    uint32_t bin_num, 
+    const uintV* bucket_offsets, 
+    uint8_t* bin_pointers,
+    const uintV* array, 
+    uint32_t array_size)
+{
+    uint32_t count = 0;
+#pragma unroll
+    for (int i = 0; i < 4; i++)
+        ((uint32_t*) bin_pointers)[threadIdinWarp + i * 32] = 0;
+    for (int i = threadIdinWarp; i < array_size; i += 32)
+    {
+        uintV vid = array[i];
+        uint32_t bin_id = hash1(vid) % bin_num;
+        for (; bin_pointers[bin_id] < bucket_offsets[bin_id + 1] - bucket_offsets[bin_id]; bin_pointers[bin_id]++)
+        {
+            uintV w = hash_table[bin_pointers[bin_id] + bucket_offsets[bin_id]];
+            if (w >= vid) {
+                count += w == vid;
+                break;
+            }
+        }
+    }
+    return count;
+}
+
+__global__ void
+    __launch_bounds__(512, 4)
+        triangle_counting_with_compactHash(
+            uintV vertex_count,
+            __restrict__ const uintE *row_ptrs,
+            __restrict__ const uintV *cols,
+            __restrict__ const uint64_t *hash_table_sizes,
+            __restrict__ const uintV *bucket_offsets,
+            __restrict__ const uintV *buckets,
+            uint32_t bin_num,
+            __restrict__ const uintV *root,
+            uintV root_num,
+            uint64_t *Counters,
+            uintV *global_allocator,
+            uintV chunk_size)
+{
+    __shared__ __align__(128) uintV shared_list[512];
+    __shared__ __align__(128) uintV hash_table[1024];
+    __shared__ __align__(128) uintV shared_bucket_offsets[1024];
+    // __shared__ __align__(128) uint8_t bin_pointers[512 * 16];
+    __shared__ uint64_t warpCounter[16];
+    __shared__ uintV chunk_start;
+    __shared__ uintV chunk_end;
+    warpCounter[warpIdinBlock] = 0;
+    uint64_t count = 0;
+    while (true)
+    {
+        if (threadIdx.x == 0)
+        {
+            chunk_start = atomicAdd(global_allocator, chunk_size);
+            chunk_end = min(root_num, chunk_start + chunk_size);
+        }
+        __syncthreads();
+        if (chunk_start >= root_num)
+        {
+            atomicAdd((unsigned long long*) warpCounter + warpIdinBlock, count);
+            if (threadIdinWarp == 0)
+                atomicAdd((unsigned long long *)Counters, (unsigned long long)warpCounter[warpIdinBlock]);
+            break;
+        }
+        for (uintV i = chunk_start; i < chunk_end; i ++)
+        {
+            uintV u = root[i];
+            uintV degree = row_ptrs[u + 1] - row_ptrs[u];
+            load_neighbor_list(shared_list, cols + row_ptrs[u], degree);
+            load_neighbor_list(hash_table, buckets + hash_table_sizes[i], hash_table_sizes[i + 1] - hash_table_sizes[i]);
+            load_neighbor_list(shared_bucket_offsets, bucket_offsets + (bin_num + 1) * i, bin_num + 1);
+
+            for(uint32_t j = warpIdinBlock + 1; j < degree; j += 16)
+            {
+                uintV v = shared_list[j];
+                count += CompactHashIntersection(hash_table, bin_num, shared_bucket_offsets, cols + row_ptrs[v], row_ptrs[v + 1] - row_ptrs[v]);
+                // count += CompactHashIntersectionWithPointer(hash_table, bin_num, shared_bucket_offsets, bin_pointers + warpIdinBlock * 512, cols + row_ptrs[v], row_ptrs[v + 1] - row_ptrs[v]);
+            }
+            __syncthreads();
+        }
+    }
+}

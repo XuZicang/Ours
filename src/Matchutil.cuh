@@ -145,6 +145,30 @@ __forceinline__ __device__ void BinaryIntersection(uintV *arrayA, uintV *arrayB,
     return;
 }
 
+__forceinline__ __device__ void BinaryIntersection(uintV *arrayA, uintV *arrayB, uintV &sizeA, uintV &sizeA1, uintV sizeB, uintV upperbound)
+{
+    uintV write_pos = 0;
+    uintV write_pos1 = 0;
+    for (uintV i = threadIdinWarp; i < sizeA; i += 32)
+    {
+        uintV vid = arrayA[i];
+        bool is_exist = BinarySearch(vid, arrayB, sizeB);
+        __syncwarp(__activemask());
+        if (is_exist)
+        {
+            coalesced_group active = cooperative_groups::coalesced_threads();
+            uintV wptr = write_pos + active.thread_rank();
+            arrayA[wptr] = vid;
+        }
+        write_pos += __reduce_add_sync(__activemask(), is_exist);
+        write_pos1 += __reduce_add_sync(__activemask(), is_exist && vid < upperbound);
+    }
+    if (threadIdinWarp == 0) {
+        sizeA = write_pos;
+        sizeA1 = write_pos1;
+    }
+    return;
+}
 __forceinline__ __device__ void BinaryIntersection(uintV *arrayA, uintV *arrayB, uintV* result, uintV &sizeA, uintV sizeB)
 {
     uintV write_pos = 0;

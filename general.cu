@@ -29,6 +29,7 @@ int main(int argc, char *argv[])
     data_filename = data_filename;
     Graph data_graph(data_filename, false);
     Query query_graph(query_filename);
+    ReuseQuery reuse_query_graph(query_filename);
     cout << data_graph.GetMaxDegree() << endl;
     CudaContextType cuda_context_type = CNMEM_MANAGED;
     CudaContextManager::CreateCudaContextManager(1, cuda_context_type);
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
     CUDA_ERROR(cudaSetDevice(context->GetDeviceMemoryInfo()->GetDevId()));
     DevGraph *gpu_graph = new DevGraph(&data_graph, context);
     DevQuery *gpu_query = new DevQuery(&query_graph, context);
+    DevReuseQuery* gpu_reuse_query = new DevReuseQuery(&reuse_query_graph, context);
     uint8_t init_layer = 2;
     // uintE init_num;
     bool init_oriented = (query_graph.GetRestriction()[1] != 0xFF);
@@ -83,7 +85,7 @@ int main(int argc, char *argv[])
     cpu_info.init_tasks = init_match->GetArray();
     cpu_info.init_task_num = init_task_num;
     cpu_info.dg_vertex_count = data_graph.GetVertexCount();
-    cpu_info.stack_layer_size = (data_graph.GetMaxDegree() + 31) / 32 * 32,
+    cpu_info.stack_layer_size = (data_graph.GetMaxDegree() + 31) / 32 * 32;
     cpu_info.q_vertex_count = query_graph.GetVertexCount();
     cpu_info.init_layer = init_layer;
     cpu_info.q_row_ptrs[0] = 0;
@@ -95,10 +97,40 @@ int main(int argc, char *argv[])
         for (uint8_t j = cpu_info.q_row_ptrs[i]; j < cpu_info.q_row_ptrs[i + 1]; j ++ )
         {
             cpu_info.q_cols[j] = gpu_query->GetCPUCols()[j];
+            printf("%x ", cpu_info.q_cols[j]);
         }
+    }
+
+    ReuseMatchInfo cpu_reuse_info;
+    cpu_reuse_info.row_ptrs = gpu_graph->GetRowPtrs();
+    cpu_reuse_info.cols = gpu_graph->GetCols();
+    cpu_reuse_info.stacks = stack.allocate_stacks();
+    cpu_reuse_info.init_tasks = init_match->GetArray();
+    cpu_reuse_info.init_task_num = init_task_num;
+    cpu_reuse_info.dg_vertex_count = data_graph.GetVertexCount();
+    cpu_reuse_info.stack_layer_size = (data_graph.GetMaxDegree() + 31) / 32 * 32;
+    cpu_reuse_info.q_vertex_count = query_graph.GetVertexCount();
+    cpu_reuse_info.init_layer = init_layer;
+    cpu_reuse_info.q_row_ptrs[0] = 0;
+    cpu_reuse_info.task_queue = gpu_task_queue->GetArray();
+    for (uint8_t i = 0; i < cpu_info.q_vertex_count; i++)
+    {
+        cpu_reuse_info.q_row_ptrs[i + 1] = gpu_reuse_query->GetCPURowPtrs()[i + 1];
+        cpu_reuse_info.q_restriction[i] = gpu_reuse_query->GetCPURestriction()[i];
+        cpu_reuse_info.q_reuse_info[i] = gpu_reuse_query->GetCPUReuse()[i];
+        cpu_reuse_info.q_is_reused[i] = gpu_reuse_query->GetCPUIsReused()[i];
+        printf("reuse[%u]: %u\n", i, cpu_reuse_info.q_reuse_info[i]);
+        for (uint8_t j = cpu_info.q_row_ptrs[i]; j < cpu_info.q_row_ptrs[i + 1]; j ++ )
+        {
+            cpu_reuse_info.q_cols[j] = gpu_reuse_query->GetCPUCols()[j];
+            printf("%x ", cpu_reuse_info.q_cols[j]);
+        }
+        cout << endl;
     }
     DeviceArray<MatchInfo>* gpu_match_info = new DeviceArray<MatchInfo>(1, context);
     HToD<MatchInfo>(gpu_match_info->GetArray(), &cpu_info, 1);
+    DeviceArray<ReuseMatchInfo>* gpu_reuse_match_info = new DeviceArray<ReuseMatchInfo>(1, context);
+    HToD<ReuseMatchInfo>(gpu_reuse_match_info->GetArray(), &cpu_reuse_info, 1);
     DeviceArray<uint64_t>* profileCounter = new DeviceArray<uint64_t>(216 * 32, context);
     GPUTimer timer;
     cudaStream_t stream = CudaContextManager::GetCudaContextManager()->GetCudaContext(DEVICEIDX)->Stream();
@@ -144,6 +176,16 @@ int main(int argc, char *argv[])
             IdleWarpCounter->GetArray()
         );
     }
+    else if (algorithm == 3)
+    {
+        DFSWarpReuseBalanceKernel<<<108, 1024, 0, stream>>>(
+            gpu_reuse_match_info->GetArray(),
+            global_allocator->GetArray(),
+            Counter->GetArray(),
+            profileCounter->GetArray(),
+            IdleWarpCounter->GetArray()
+        );
+    }
     CUDA_ERROR(cudaStreamSynchronize(stream));
     timer.EndTimer();
     uint64_t counts;
@@ -151,7 +193,7 @@ int main(int argc, char *argv[])
     CUDA_ERROR(cudaStreamSynchronize(stream));
     // profileCounter->Print();
     uint32_t warpN = 216 * 32;
-    if (algorithm == 2) warpN = 108 * 32;
+    if (algorithm == 2 || algorithm == 3) warpN = 108 * 32;
     uint64_t* cpu_profileCounter = new uint64_t[warpN];
     DToH<uint64_t>(cpu_profileCounter, profileCounter->GetArray(), warpN);
     sort(cpu_profileCounter, cpu_profileCounter + warpN);

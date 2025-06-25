@@ -1,0 +1,13 @@
+start read csr bin file....uintV_size=4,uintE_size=8
+vertex_count=8860450,edge_count=520523686
+finish read csr bin file, elapsed_time=8224.78ms
+520523686
+1926
+0x7f8578805400
+53961
+135740
+8670749
+hash_table_total_size: 2103809
+hash_table_total_size: 2805036
+9936161560
+698.772ms

@@ -23,13 +23,14 @@ int main(int argc, char *argv[])
 {
     CommandLine cmd(argc, argv);
     std::string data_filename = cmd.GetOptionValue("-f", "../data/com-dblp.ungraph.txt");
-    int dense_threshold = cmd.GetOptionIntValue("-dense", 256);
-    int middle_threshold = cmd.GetOptionIntValue("-middle", 128);
-    int algorithm = cmd.GetOptionIntValue("-algo", 1);
-    int dense_chunk = cmd.GetOptionIntValue("-dc", 32);
+    int dense_threshold = cmd.GetOptionIntValue("-dense", 512);
+    int middle_threshold = cmd.GetOptionIntValue("-middle", 256);
+    int algorithm = cmd.GetOptionIntValue("-algo", 12);
+    int dense_chunk = cmd.GetOptionIntValue("-dc", 1);
     int sparse_chunk = cmd.GetOptionIntValue("-sc", 32);
-    int middle_chunk = cmd.GetOptionIntValue("-mc", 32);
+    int middle_chunk = cmd.GetOptionIntValue("-mc", 8);
     int group_size = cmd.GetOptionIntValue("-gs", 64);
+    int bin_num = cmd.GetOptionIntValue("-bin", 512);
     int dev_id = 0;
     data_filename = data_filename;
     Graph data_graph(data_filename, false);
@@ -83,11 +84,17 @@ int main(int argc, char *argv[])
     HashGraph* hashgraph;
     HashGraph* dense_hashgraph;
     HashGraph* middle_hashgraph;
+    CompactHashGraph* compact_hashgraph;
     if (algorithm == 5) hashgraph = new HashGraph(&data_graph, context);
     if (algorithm == 6) hashgraph = new HashGraph(&data_graph, dense_vertex.data(), dense_vertex.size(), context);
     if (algorithm == 10 || algorithm == 11) {
         dense_hashgraph = new HashGraph(&data_graph, dense_vertex.data(), dense_vertex.size(), context);
         middle_hashgraph = new HashGraph(&data_graph, middle_vertex.data(), middle_vertex.size(), context);
+    }
+    if (algorithm == 12)
+    {
+        dense_hashgraph = new HashGraph(&data_graph, dense_vertex.data(), dense_vertex.size(), context);
+        compact_hashgraph = new CompactHashGraph(&data_graph, middle_vertex.data(), middle_vertex.size(), bin_num, context);
     }
     GPUTimer timer;
     cudaStream_t stream = CudaContextManager::GetCudaContextManager()->GetCudaContext(DEVICEIDX)->Stream();
@@ -357,6 +364,45 @@ int main(int argc, char *argv[])
             Counter->GetArray(),
             global_allocator_sparse->GetArray(),
             sparse_chunk);
+    }
+    else if (algorithm == 12)
+    {
+        triangle_counting_with_hash1<<<432, 512, 0, stream>>>(
+            data_graph.GetVertexCount(),
+            gpu_aligned_graph->GetRowPtrs(),
+            gpu_aligned_graph->GetCols(),
+            dense_vertices->GetArray(),
+            dense_vertex.size(),
+            dense_hashgraph->GetTableSizes(),
+            dense_hashgraph->GetHashTables(),
+            Counter->GetArray(),
+            global_allocator->GetArray(),
+            dense_chunk
+        );
+        triangle_counting_with_compactHash<<<432, 512, 0, stream>>>(
+            data_graph.GetVertexCount(),
+            gpu_graph->GetRowPtrs(),
+            gpu_graph->GetCols(),
+            compact_hashgraph->GetTableSizes(),
+            compact_hashgraph->GetBucketOffsets(),
+            compact_hashgraph->GetBuckets(),
+            bin_num,
+            middle_vertices->GetArray(),
+            middle_vertex.size(),
+            Counter->GetArray(),
+            global_allocator_middle->GetArray(),
+            middle_chunk
+        );
+        triangle_counting_sparse_with_subwarp<<<216, 1024, 0, stream>>>(
+            data_graph.GetVertexCount(),
+            gpu_graph->GetRowPtrs(),
+            gpu_graph->GetCols(),
+            sparse_vertices->GetArray(),
+            sparse_vertex.size(),
+            Counter->GetArray(),
+            global_allocator_sparse->GetArray(),
+            sparse_chunk);
+
     }
     CUDA_ERROR(cudaStreamSynchronize(stream));
     timer.EndTimer();
